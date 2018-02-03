@@ -119,6 +119,7 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
     #Calculating the SP 
     PEnergy = []
     StopPow = []
+    Lratio = []
     dEdx =0
     
     for i in range (0,500000):
@@ -127,6 +128,7 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
           break
         ENext = ENextAU*Ions.MeVToErg  # Unit: MeV to eng
         VNext = np.sqrt(2*ENext/ProjectileMass)
+        ratio = VNext/Electrons.ThermalVelocity
         IonCoulombLog = Ions.CoulombLog(ProjectileMass, VNext, ProjectileCharge, TotalDebyeLength,UseEDebyeLength)
         ElectronCoulombLog = Electrons.CoulombLog(ProjectileMass, VNext, ProjectileCharge, TotalDebyeLength,UseEDebyeLength)
     
@@ -146,9 +148,12 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
         else:
             IonCollectEfffects = 0
     
+        IonCollectEfffects = 0
+        ElectronCollectEfffects = 0
         IondEdx = (ProjectileChargeAU*Ions.e/VNext)**2*Ions.freq**2*(IonGxtf*IonCoulombLog+IonCollectEfffects)*62.4150647
         ElectrondEdx = (ProjectileChargeAU*Ions.e/VNext)**2*Electrons.freq**2*(ElectronGxtf*ElectronCoulombLog+ElectronCollectEfffects)*62.4150647
         dEdx = IondEdx+ElectrondEdx
         PEnergy.append(ENextAU)
         StopPow.append(dEdx)
-    return PEnergy, StopPow
+        Lratio.append(ratio)
+    return PEnergy, StopPow, Lratio
