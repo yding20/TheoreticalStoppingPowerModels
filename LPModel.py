@@ -148,8 +148,8 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
         else:
             IonCollectEfffects = 0
     
-        IonCollectEfffects = 0
-        ElectronCollectEfffects = 0
+        #IonCollectEfffects = 0
+        #ElectronCollectEfffects = 0
         IondEdx = (ProjectileChargeAU*Ions.e/VNext)**2*Ions.freq**2*(IonGxtf*IonCoulombLog+IonCollectEfffects)*62.4150647
         ElectrondEdx = (ProjectileChargeAU*Ions.e/VNext)**2*Electrons.freq**2*(ElectronGxtf*ElectronCoulombLog+ElectronCollectEfffects)*62.4150647
         dEdx = IondEdx+ElectrondEdx
