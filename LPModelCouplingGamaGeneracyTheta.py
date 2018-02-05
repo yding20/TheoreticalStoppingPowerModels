@@ -64,6 +64,7 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
             self.EffectiveTempe = self.Tempe*(FermiDirac2/FermiDirac1)
             
             self.ThermalVelocity = np.sqrt(2*self.Boltz*self.Tempe/self.Mass)
+            self.AVEThermalVelocity = np.sqrt(3*self.Boltz*self.Tempe/self.Mass)
             self.DebyeLength = np.sqrt(self.Boltz*self.EffectiveTempe/(4*np.pi*self.NumDensity*self.Charge**2))
             self.freq = np.sqrt(4*np.pi*self.NumDensity*self.Charge**2/self.Mass)
         
@@ -135,7 +136,7 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
           break
         ENext = ENextAU*Ions.MeVToErg  # Unit: MeV to eng
         VNext = np.sqrt(2*ENext/ProjectileMass)
-        ratio = VNext/Electrons.ThermalVelocity
+        ratio = VNext/Electrons.AVEThermalVelocity
         IonCoulombLog = Ions.CoulombLog(ProjectileMass, VNext, ProjectileCharge, TotalDebyeLength,UseEDebyeLength)
         ElectronCoulombLog = Electrons.CoulombLog(ProjectileMass, VNext, ProjectileCharge, TotalDebyeLength,UseEDebyeLength)
     
@@ -145,20 +146,20 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
     ###################################################################
     ########   collective effects(where the jump come from)    ########
     ###################################################################
-        if Electrons.xtf_collective > 1:
-            ElectronCollectEfffects = np.log(1.123*np.sqrt(Electrons.xtf_collective))
+        if Electrons.xtf > 1:
+            ElectronCollectEfffects = np.log(1.123*np.sqrt(Electrons.xtf))
         else:
             ElectronCollectEfffects = 0
     
-        if Ions.xtf_collective > 1:
-            IonCollectEfffects = np.log(1.123*np.sqrt(Ions.xtf_collective))
+        if Ions.xtf > 1:
+            IonCollectEfffects = np.log(1.123*np.sqrt(Ions.xtf))
         else:
             IonCollectEfffects = 0
     
-        IonCollectEfffects = 0
-        ElectronCollectEfffects = 0
+        #IonCollectEfffects = 0
+        #ElectronCollectEfffects = 0
         IondEdx = (ProjectileChargeAU*Ions.e/VNext)**2*Ions.freq**2*(IonGxtf*IonCoulombLog+IonCollectEfffects)*62.4150647
-        ElectrondEdx = (ProjectileChargeAU*Ions.e/VNext)**2*Electrons.freq**2*(ElectronGxtf*ElectronCollectEfffects+0)*62.4150647
+        ElectrondEdx = (ProjectileChargeAU*Ions.e/VNext)**2*Electrons.freq**2*(ElectronGxtf*ElectronCoulombLog+ElectronCollectEfffects)*62.4150647
         dEdx = IondEdx+ElectrondEdx
 #	dEdx = ElectrondEdx
         PEnergy.append(ENextAU)
