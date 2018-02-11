@@ -42,7 +42,7 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
                 self.Charge = self.e
                 self.NumDensity = Density/(Mass*self.amu)*Charge
 
-            self.NumDensityIonied = self.NumDensity/Charge*0.64
+            self.NumDensityIonied = self.NumDensity/Charge*1
             self.Tempe = Tempe*self.eVToKelvin
             self.DegeneracyTheta = self.Tempe*(8*np.pi/(3*self.NumDensityIonied))**(2/3)*2*self.Mass*self.Boltz/(self.hbar*2*np.pi)**2
             self.FermiEnergy = (3*self.NumDensityIonied/(8*np.pi))**(2/3)*(self.hbar*2*np.pi)**2/(2*self.Mass)
@@ -58,8 +58,8 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
             
             FermiDirac1 = lambda t: t**(1/2)/(np.exp(t-self.mukbt)+1)
             FermiDirac2 = lambda t: t**(3/2)/(np.exp(t-self.mukbt)+1)
-            FermiDirac1 = integrate.quad(FermiDirac1, 0, 400)[0] * np.sqrt(np.pi)/2
-            FermiDirac2 = integrate.quad(FermiDirac2, 0, 400)[0]* np.sqrt(np.pi)/2*3/2
+            FermiDirac1 = integrate.quad(FermiDirac1, 0, 100)[0]/(np.sqrt(np.pi)/2)
+            FermiDirac2 = integrate.quad(FermiDirac2, 0, 100)[0]/(np.sqrt(np.pi)/2*3/2)
             
             self.EffectiveTempe = self.Tempe*(FermiDirac2/FermiDirac1)
             
@@ -83,7 +83,8 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
             elif OptionDebyeLength == 1:
                 return 0.5*math.log(1+(UseEDebyeLength/self.Pmin)**2)
             else:
-                return 0.5*math.log(1+(self.DebyeLength/self.Pmin)**2)
+    #            return 0.5*math.log(1+(self.DebyeLength/self.Pmin)**2)
+                return 0.5*math.log((self.DebyeLength/self.Pmin)**2)
             
         def Gxtf (self, ProjectileMass, ProjectileVelocity, TotalDebyeLength, CoulombLoginput):
             self.xtf = (ProjectileVelocity/self.ThermalVelocity)**2
@@ -100,6 +101,7 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
     if QuantumDegeneracy == 1:
         TotalDebyeLength = np.sqrt(Ions.Boltz*Ions.EffectiveTempe/(4*np.pi*(Ions.NumDensity*Ions.Charge**2+\
                                                                Electrons.NumDensity*Electrons.Charge**2)) )  
+
         UseEDebyeLength  = np.sqrt(Ions.Boltz*Ions.EffectiveTempe/(4*np.pi*(0+\
                                                                Electrons.NumDensity*Electrons.Charge**2)) ) 
     else:
@@ -146,13 +148,13 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
     ###################################################################
     ########   collective effects(where the jump come from)    ########
     ###################################################################
-        if Electrons.xtf > 1:
-            ElectronCollectEfffects = np.log(1.123*np.sqrt(Electrons.xtf))
+        if Electrons.xtf_collective > 1:
+            ElectronCollectEfffects = np.log(1.123*np.sqrt(Electrons.xtf_collective))
         else:
             ElectronCollectEfffects = 0
     
-        if Ions.xtf > 1:
-            IonCollectEfffects = np.log(1.123*np.sqrt(Ions.xtf))
+        if Ions.xtf_collective > 1:
+            IonCollectEfffects = np.log(1.123*np.sqrt(Ions.xtf_collective))
         else:
             IonCollectEfffects = 0
     

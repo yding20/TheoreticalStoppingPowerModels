@@ -35,6 +35,7 @@ class Particles(object):
         self.Beta = 1 / (self.Boltz*self.Tempe)
         self.DebyeK = np.sqrt(self.Beta*self.Charge**2*self.NumDensity)
         self.ThermalVelocity = np.sqrt(2*self.Boltz*self.Tempe/self.Mass)
+        self.AVEThermalVelocity = np.sqrt(3*self.Boltz*self.Tempe/self.Mass)
         
     def CSIntegration(self, ProjectileMass, ProjectileVelocity, ProjectileCharge):
         self.RelativeMass = self.Mass*ProjectileMass/(self.Mass + ProjectileMass)
@@ -56,7 +57,6 @@ class Particles(object):
 
     def Etatf (self, u, PC):
         return self.Charge*PC/(4*np.pi*self.hbar*u)
-    
     def ExpMinus(self, u, PV):
         return np.exp(-0.5*self.Beta*self.Mass*(PV-u)**2)
     def ExpAdd(self, u, PV):
@@ -106,13 +106,13 @@ def Ffunc(x):  #Total, sum of electron effects and ion effects
     return Ffunction
 #Condition Initialization      
 
-Ions = Particles(PN = 1, Mass=9,Charge=4,Tempe=50,Density=1.78)
-Electrons = Particles(PN = 0, Mass=9,Charge=4,Tempe=50,Density=1.78)
+Ions = Particles(PN = 1, Mass=1,Charge=1,Tempe=200,Density=1.67)
+Electrons = Particles(PN = 0, Mass=1,Charge=1,Tempe=200,Density=1.67)
 
 ProjectileMass= 1*Ions.amu 
 ProjectileCharge = 1*Ions.eLH
 
-InputProjectileEnergy = 0.01 #MeV
+InputProjectileEnergy = 12 #MeV
 ProjectileEnergy = InputProjectileEnergy*Ions.MeVToErg  # Unit: MeV to eng
     
 E0 = ProjectileEnergy
@@ -133,14 +133,26 @@ def dEdxCR(V0):
                                    1/(Electrons.Beta*ProjectileMass*V0**2)*Fcombi)*Electrons.CGSToMeVum
     return ElectrondEdxCR
 
-Integration = 0
+
+EIntegration = 0
+IIntegration = 0
 for i in range(2000):
     U = (-1+0.001*i)
     u = (-1+0.001*i)*V0
+####Electrons effects
     if u!=0:
-        kernel = U*Ffunc(u)*np.log(Ffunc(u)/Electrons.DebyeK**2)*Rho(u)[0]/Rho(u)[2]
-    Integration+= kernel*0.001
-Fcombi = Ffunc(V0)*np.log(Ffunc(V0)/Electrons.DebyeK**2)-np.conj(Ffunc(V0))*np.log(np.conj(Ffunc(V0))/Electrons.DebyeK**2)
-ElectrondEdxCR = ProjectileCharge**2/(4*np.pi)/(2*np.pi)*(Integration  - \
-                                   1/(Electrons.Beta*ProjectileMass*V0**2)*Fcombi)*Electrons.CGSToMeVum
-print(ElectrondEdxCR)
+        Ekernel = U*Ffunc(u)*np.log(Ffunc(u)/Electrons.DebyeK**2)*Rho(u)[0]/Rho(u)[2]
+        Ikernel = U*Ffunc(u)*np.log(Ffunc(u)/Ions.DebyeK**2)*Rho(u)[1]/Rho(u)[2]
+    EIntegration+= Ekernel*0.001
+    IIntegration+= Ikernel*0.001
+
+Fcombi = Ffunc(V0)*np.log(Ffunc(V0)/Electrons.DebyeK**2)-Ffunc(-V0)*np.log(Ffunc(-V0)/Electrons.DebyeK**2)
+ElectrondEdxCR = ProjectileCharge**2/(4*np.pi)/(2*np.pi)*(EIntegration  - \
+                                   1/(Electrons.Beta*ProjectileMass*V0**2)*Rho(V0)[0]/Rho(V0)[2]*Fcombi)*Electrons.CGSToMeVum
+
+Fcombi = Ffunc(V0)*np.log(Ffunc(V0)/Ions.DebyeK**2)-Ffunc(V0)*np.log(Ffunc(V0)/Ions.DebyeK**2)
+IondEdxCR = ProjectileCharge**2/(4*np.pi)/(2*np.pi)*(IIntegration  - \
+                                   1/(Ions.Beta*ProjectileMass*V0**2)*Rho(V0)[1]/Rho(V0)[2]*Fcombi)*Ions.CGSToMeVum
+
+
+print(ElectrondEdxCR,IondEdxCR)

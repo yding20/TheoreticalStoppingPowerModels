@@ -83,7 +83,7 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
             
         def Gxtf (self, ProjectileMass, ProjectileVelocity, TotalDebyeLength, CoulombLoginput):
             self.xtf = (ProjectileVelocity/self.ThermalVelocity)**2
-            self.xtf_collective = (ProjectileVelocity/self.ThermalVelocity)**2  ## Following the Erratum statement
+            self.xtf_collective = 2*(ProjectileVelocity/self.ThermalVelocity)**2  ## Following the Erratum statement
             self.muxtf = np.sqrt(np.pi)/2*math.erf(np.sqrt(self.xtf))-np.sqrt(self.xtf)*np.exp(-self.xtf)
             self.dudx = np.sqrt(self.xtf)*np.exp(-self.xtf)
             return self.muxtf - self.Mass/ProjectileMass*(self.dudx-(self.muxtf+self.dudx)/CoulombLoginput)
@@ -138,17 +138,17 @@ def LP (QuantumDegeneracy, OptionDebyeLength,FieldDensity, FieldTem, FieldCharge
     ########   collective effects(where the jump come from)    ########
     ###################################################################
         if Electrons.xtf > 1:
-            ElectronCollectEfffects = np.log(1.122*np.sqrt(Electrons.xtf_collective))
+            ElectronCollectEfffects = np.log(1.122*np.sqrt(Electrons.xtf))
         else:
             ElectronCollectEfffects = 0
     
         if Ions.xtf > 1:
-            IonCollectEfffects = np.log(1.122*np.sqrt(Ions.xtf_collective))
+            IonCollectEfffects = np.log(1.122*np.sqrt(Ions.xtf))
         else:
             IonCollectEfffects = 0
     
-        IonCollectEfffects = 0
-        ElectronCollectEfffects = 0
+        #IonCollectEfffects = 0
+        #ElectronCollectEfffects = 0
         IondEdx = (ProjectileChargeAU*Ions.e/VNext)**2*Ions.freq**2*(IonGxtf*IonCoulombLog+IonCollectEfffects)*62.4150647
         ElectrondEdx = (ProjectileChargeAU*Ions.e/VNext)**2*Electrons.freq**2*(ElectronGxtf*ElectronCoulombLog+ElectronCollectEfffects)*62.4150647
         dEdx = IondEdx+ElectrondEdx
